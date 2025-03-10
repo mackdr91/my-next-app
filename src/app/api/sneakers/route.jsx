@@ -112,15 +112,65 @@ export async function PUT(req) {
 
 export async function DELETE(req) {
     try {
-        const { id } = await req.json();
+        const { ids } = await req.json();
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid or empty sneaker IDs provided' }),
+                { 
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }
+
         const data = await fs.readFile(filePath, 'utf8');
         let sneakers = JSON.parse(data);
 
-        sneakers.sneakers = sneakers.sneakers.filter(sneaker => sneaker.id !== id);
+        // Store sneakers to be deleted for the response
+        const deletedSneakers = sneakers.sneakers.filter(sneaker => ids.includes(sneaker.id));
+
+        if (deletedSneakers.length !== ids.length) {
+            return new Response(
+                JSON.stringify({ 
+                    error: 'Some sneaker IDs were not found',
+                    deletedCount: deletedSneakers.length,
+                    requestedCount: ids.length,
+                    deletedSneakers
+                }),
+                { 
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }
+
+        // Remove the sneakers
+        sneakers.sneakers = sneakers.sneakers.filter(sneaker => !ids.includes(sneaker.id));
         await fs.writeFile(filePath, JSON.stringify(sneakers, null, 4));
 
-        return new Response(JSON.stringify({ message: 'Sneaker deleted successfully' }), { status: 200 });
+        return new Response(
+            JSON.stringify({
+                message: 'Sneakers deleted successfully',
+                count: deletedSneakers.length,
+                deletedSneakers
+            }),
+            { 
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Failed to delete sneaker' }), { status: 500 });
+        console.error('Error deleting sneakers:', error);
+        return new Response(
+            JSON.stringify({ 
+                error: 'Failed to delete sneakers',
+                details: error.message
+            }), 
+            { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
     }
 }
