@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withProtectedSession } from '../auth/[...nextauth]/route';
+import { withProtectedSession } from '../../utils/auth';
 import Sneaker from '../../../models/Sneaker';
 import { dbConnect } from '../../../utils/db';
 

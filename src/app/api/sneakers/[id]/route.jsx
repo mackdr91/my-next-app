@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '../../auth/config';
 import Sneaker from '../../../../models/Sneaker';
 import User from '../../../../models/User';
 import { dbConnect } from '../../../../utils/db';
