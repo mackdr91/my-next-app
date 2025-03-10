@@ -3,12 +3,5 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "MONGODB_URI": "REQUIRED_ENV_VARIABLE",
-    "NEXTAUTH_URL": "REQUIRED_ENV_VARIABLE",
-    "NEXTAUTH_SECRET": "REQUIRED_ENV_VARIABLE",
-    "GOOGLE_ID": "REQUIRED_ENV_VARIABLE",
-    "GOOGLE_SECRET": "REQUIRED_ENV_VARIABLE"
-  }
+  "regions": ["iad1"]
 }
