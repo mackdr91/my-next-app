@@ -81,6 +81,17 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
     try {
         const { id } = params;
+        
+        if (!id || isNaN(Number(id))) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid sneaker ID provided' }),
+                { 
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }
+
         const data = await fs.readFile(filePath, 'utf8');
         const sneakers = JSON.parse(data);
 
@@ -88,22 +99,41 @@ export async function DELETE(req, { params }) {
         if (index === -1) {
             return new Response(
                 JSON.stringify({ error: 'Sneaker not found' }), 
-                { status: 404 }
+                { 
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' }
+                }
             );
         }
 
+        // Store the sneaker before deletion for the response
+        const deletedSneaker = sneakers.sneakers[index];
+
+        // Remove the sneaker
         sneakers.sneakers.splice(index, 1);
         await fs.writeFile(filePath, JSON.stringify(sneakers, null, 4));
 
         return new Response(
-            JSON.stringify({ message: 'Sneaker deleted successfully' }), 
-            { status: 200 }
+            JSON.stringify({
+                message: 'Sneaker deleted successfully',
+                deletedSneaker
+            }), 
+            { 
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
     } catch (error) {
         console.error('Error deleting sneaker:', error);
         return new Response(
-            JSON.stringify({ error: 'Failed to delete sneaker' }), 
-            { status: 500 }
+            JSON.stringify({ 
+                error: 'Failed to delete sneaker',
+                details: error.message
+            }), 
+            { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
     }
 }

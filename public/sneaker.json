@@ -19,15 +19,6 @@
             "inStock": true
         },
         {
-            "id": 3,
-            "brand": "Nike",
-            "model": "Air Max 90",
-            "price": 120,
-            "color": "Triple White",
-            "size": 11,
-            "inStock": false
-        },
-        {
             "id": 4,
             "brand": "New Balance",
             "model": "990v5",
