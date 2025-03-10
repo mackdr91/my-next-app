@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="mx-auto py-8">
-        <h1 className="text-4xl font-bold text-center mb-8">Sneaker Collection</h1>
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-900">Sneaker Collection</h1>
         <Grid sneakers={sneakers} loading={loading} error={error} />
       </div>
     </main>
