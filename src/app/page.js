@@ -174,7 +174,7 @@ export default function Home() {
   if (status === 'unauthenticated') {
     return (
       <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px] flex items-center justify-center">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
             <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
               Sneaker Collection Manager
@@ -184,7 +184,7 @@ export default function Home() {
               manage your collection, and never lose sight of your prized possessions.
             </p>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-left">
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6">
                   <h3 className="text-xl font-semibold text-white mb-2">Track Your Collection</h3>
                   <p className="text-gray-400">Easily manage and organize your entire sneaker collection in one place.</p>
@@ -213,26 +213,27 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
-      <div className="mx-auto py-8">
-        <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-white">👟 Sneaker Central</h1>
-            {status === 'authenticated' && (
-              <button
-                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                className="px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm border border-white/20 hover:bg-white/10 transition-all duration-300"
-              >
-                Logout
-              </button>
-            )}
+      <div className="mx-auto py-4 sm:py-8">
+        <div className="max-w-[2000px] mx-auto px-3 sm:px-6 md:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left">👟 Sneaker Central</h1>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {status === 'authenticated' && (
+                <button
+                  onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                  className="w-full sm:w-auto px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm border border-white/20 hover:bg-white/10 transition-all duration-300"
+                >
+                  Logout
+                </button>
+              )}
 
-            <div className="flex gap-4">
-              {isDeleteMode ? (
+              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
+                {isDeleteMode ? (
                 <>
                   <button
                     onClick={handleDelete}
                     disabled={selectedSneakers.length === 0}
-                    className={`px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm border transition-all duration-300 ${selectedSneakers.length === 0 ? 'bg-red-500/30 border-red-500/20 cursor-not-allowed' : 'bg-red-500/20 border-red-500/30 hover:bg-red-500/30'}`}
+                    className={`w-full sm:w-auto px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm border transition-all duration-300 ${selectedSneakers.length === 0 ? 'bg-red-500/30 border-red-500/20 cursor-not-allowed' : 'bg-red-500/20 border-red-500/30 hover:bg-red-500/30'}`}
                   >
                     Delete Selected ({selectedSneakers.length})
                   </button>
@@ -241,7 +242,7 @@ export default function Home() {
                       setIsDeleteMode(false);
                       setSelectedSneakers([]);
                     }}
-                    className="px-4 py-2 rounded-md text-white/80 font-medium backdrop-blur-sm bg-white/5 border border-white/20 hover:bg-white/10 transition-all duration-300"
+                    className="w-full sm:w-auto px-4 py-2 rounded-md text-white/80 font-medium backdrop-blur-sm bg-white/5 border border-white/20 hover:bg-white/10 transition-all duration-300"
                   >
                     Cancel
                   </button>
@@ -250,18 +251,19 @@ export default function Home() {
                 <>
                   <button
                     onClick={() => setIsDeleteMode(true)}
-                    className="px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
+                    className="w-full sm:w-auto px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
                   >
                     Delete Mode
                   </button>
                   <button
                     onClick={handleAdd}
-                    className="px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
+                    className="w-full sm:w-auto px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
                   >
                     Add Sneaker
                   </button>
                 </>
               )}
+              </div>
             </div>
           </div>
           {status === 'loading' || loading ? (
@@ -270,7 +272,7 @@ export default function Home() {
             </div>
           ) : error ? (
             <div className="flex justify-center items-center min-h-[400px]">
-              <div className="text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <div className="text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-4 mx-2 sm:mx-0 text-center sm:text-left">
                 {error}
                 <button
                   onClick={fetchSneakers}
@@ -294,43 +296,43 @@ export default function Home() {
         </div>
       </div>
       <Modal
-          isOpen={isModalOpen}
-          onClose={() => {
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingSneaker(null);
+        }}
+        onSubmit={async (sneakerData) => {
+          setIsSubmitting(true);
+          try {
+            const method = editingSneaker ? 'PUT' : 'POST';
+            const url = editingSneaker
+              ? `/api/sneakers/${editingSneaker._id}`
+              : '/api/sneakers';
+
+            const res = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(editingSneaker ? { id: editingSneaker._id, ...sneakerData } : sneakerData),
+            });
+
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.error || 'Failed to save sneaker');
+            }
+
+            fetchSneakers();
             setIsModalOpen(false);
             setEditingSneaker(null);
-          }}
-          onSubmit={async (sneakerData) => {
-            setIsSubmitting(true);
-            try {
-              const method = editingSneaker ? 'PUT' : 'POST';
-              const url = editingSneaker
-                ? `/api/sneakers/${editingSneaker._id}`
-                : '/api/sneakers';
-
-              const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editingSneaker ? { id: editingSneaker._id, ...sneakerData } : sneakerData),
-              });
-
-              if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Failed to save sneaker');
-              }
-
-              fetchSneakers();
-              setIsModalOpen(false);
-              setEditingSneaker(null);
-            } catch (error) {
-              console.error('Error saving sneaker:', error);
-              setError(error.message || 'Failed to save sneaker. Please try again.');
-            } finally {
-              setIsSubmitting(false);
-            }
-          }}
-          editingSneaker={editingSneaker}
-          isSubmitting={isSubmitting}
-        />
+          } catch (error) {
+            console.error('Error saving sneaker:', error);
+            setError(error.message || 'Failed to save sneaker. Please try again.');
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
+        editingSneaker={editingSneaker}
+        isSubmitting={isSubmitting}
+      />
     </main>
   );
 }

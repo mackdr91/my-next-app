@@ -60,12 +60,12 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl border border-white/20 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px] p-4">
+      <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-xl border border-white/20 w-full max-w-md">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center">Register</h2>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md text-red-300 text-sm">
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-md text-red-300 text-sm text-center sm:text-left">
             {error}
           </div>
         )}
@@ -80,7 +80,7 @@ export default function Register() {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-base sm:text-sm"
               required
               minLength={3}
             />
@@ -95,7 +95,7 @@ export default function Register() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-base sm:text-sm"
               required
             />
           </div>
@@ -109,7 +109,7 @@ export default function Register() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-base sm:text-sm"
               required
               minLength={6}
             />
@@ -124,7 +124,7 @@ export default function Register() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-base sm:text-sm"
               required
               minLength={6}
             />
@@ -133,20 +133,20 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 bg-blue-500/20 border border-blue-500/30 rounded-md text-white font-medium hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+            className="w-full py-3 sm:py-2 px-4 bg-blue-500/20 border border-blue-500/30 rounded-md text-white font-medium hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-base sm:text-sm"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-white/60">
+        <div className="mt-6 text-center text-base sm:text-sm text-white/60">
           Already have an account?{' '}
-          <button
-            onClick={() => router.push('/auth/signin')}
-            className="text-blue-400 hover:text-blue-300 focus:outline-none"
+          <a 
+            href="/auth/signin"
+            className="text-blue-400 hover:text-blue-300 focus:outline-none px-2 py-1"
           >
             Sign In
-          </button>
+          </a>
         </div>
       </div>
     </div>
