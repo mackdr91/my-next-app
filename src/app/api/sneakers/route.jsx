@@ -35,15 +35,61 @@ export async function GET() {
 export async function POST(req) {
     try {
         const newSneaker = await req.json();
+
+        // Validate required fields
+        const requiredFields = ['brand', 'model', 'price', 'color', 'size'];
+        const missingFields = requiredFields.filter(field => !newSneaker[field]);
+        
+        if (missingFields.length > 0) {
+            return new Response(
+                JSON.stringify({
+                    error: `Missing required fields: ${missingFields.join(', ')}`
+                }),
+                { status: 400 }
+            );
+        }
+
+        // Validate data types and ranges
+        if (typeof newSneaker.price !== 'number' || newSneaker.price <= 0) {
+            return new Response(
+                JSON.stringify({ error: 'Price must be a positive number' }),
+                { status: 400 }
+            );
+        }
+
+        if (typeof newSneaker.size !== 'number' || newSneaker.size < 4 || newSneaker.size > 18) {
+            return new Response(
+                JSON.stringify({ error: 'Size must be a number between 4 and 18' }),
+                { status: 400 }
+            );
+        }
+
         const data = await fs.readFile(filePath, 'utf8');
         const sneakers = JSON.parse(data);
-        newSneaker.id = sneakers.sneakers.length + 1; // Auto-increment ID
-        sneakers.sneakers.push(newSneaker);
 
+        // Find the highest ID and increment by 1
+        const maxId = sneakers.sneakers.reduce((max, sneaker) => Math.max(max, sneaker.id), 0);
+        newSneaker.id = maxId + 1;
+
+        // Set inStock to true by default if not provided
+        newSneaker.inStock = newSneaker.inStock ?? true;
+
+        sneakers.sneakers.push(newSneaker);
         await fs.writeFile(filePath, JSON.stringify(sneakers, null, 4));
-        return new Response(JSON.stringify(newSneaker), { status: 201 });
+
+        return new Response(JSON.stringify(newSneaker), { 
+            status: 201,
+            headers: { 'Content-Type': 'application/json' }
+        });
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Failed to add sneaker' }), { status: 500 });
+        console.error('Error adding sneaker:', error);
+        return new Response(
+            JSON.stringify({ error: 'Failed to add sneaker' }),
+            { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
     }
 }
 
