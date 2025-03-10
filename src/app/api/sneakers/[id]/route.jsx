@@ -5,7 +5,7 @@ const filePath = path.join(process.cwd(), 'public', 'sneaker.json');
 
 export async function PUT(req, { params }) {
     try {
-        const { id } = params;
+        const { id } = await params;
         const updatedSneaker = await req.json();
 
         // Validate required fields if they are present in the update
@@ -80,7 +80,7 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
     try {
-        const { id } = params;
+        const { id } = await params;
         
         if (!id || isNaN(Number(id))) {
             return new Response(

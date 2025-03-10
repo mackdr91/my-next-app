@@ -10,22 +10,13 @@
             "inStock": true
         },
         {
-            "brand": "Voluptate ad dolore",
-            "model": "Et provident quos r",
-            "price": 235,
-            "color": "Occaecat expedita sa",
+            "brand": "Veniam harum corrup",
+            "model": "Dolor est et at vel",
+            "price": 47,
+            "color": "Et amet error quia",
             "size": 15,
-            "inStock": false,
-            "id": 7
-        },
-        {
-            "brand": "Ut id fugit et ad",
-            "model": "Doloribus odio labor",
-            "price": 555,
-            "color": "Lorem soluta quia cu",
-            "size": 18,
             "inStock": true,
-            "id": 8
+            "id": 5
         }
     ]
 }
