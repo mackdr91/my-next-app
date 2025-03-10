@@ -6,7 +6,7 @@ const Card = ({ sneaker, onEdit, isDeleteMode, isSelected, onToggleSelect }) => 
   return (
     <div 
       className={`bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden relative ${!isDeleteMode && 'hover:bg-white/20 hover:scale-[1.02]'} ${isSelected && 'ring-2 ring-red-500'} transition-all duration-300`}
-      onClick={() => isDeleteMode && onToggleSelect(sneaker.id)}
+      onClick={() => isDeleteMode && onToggleSelect(sneaker._id)}
     >
       {isDeleteMode && (
         <div className="absolute top-2 right-2 z-10">
@@ -15,7 +15,7 @@ const Card = ({ sneaker, onEdit, isDeleteMode, isSelected, onToggleSelect }) => 
             checked={isSelected}
             onChange={(e) => {
               e.stopPropagation();
-              onToggleSelect(sneaker.id);
+              onToggleSelect(sneaker._id);
             }}
             className="h-5 w-5 text-red-300 bg-white/5 rounded border-red-500/30 focus:ring-red-500/50 checked:bg-red-500/20"
           />

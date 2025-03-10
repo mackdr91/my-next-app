@@ -10,12 +10,12 @@
             "inStock": true
         },
         {
-            "brand": "Veniam harum corrup",
+            "brand": "Veniam harum corrupvhvh",
             "model": "Dolor est et at vel",
-            "price": 47,
+            "price": 479,
             "color": "Et amet error quia",
             "size": 15,
-            "inStock": true,
+            "inStock": false,
             "id": 5
         }
     ]

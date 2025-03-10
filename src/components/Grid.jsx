@@ -52,11 +52,11 @@ const Grid = ({ sneakers, error, loading, onEdit, isDeleteMode, selectedSneakers
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 px-4 sm:px-6 md:px-8 max-w-[2000px] mx-auto">
       {sneakers.map((sneaker) => (
         <Card
-          key={sneaker.id}
+          key={sneaker._id}
           sneaker={sneaker}
           onEdit={() => onEdit(sneaker)}
           isDeleteMode={isDeleteMode}
-          isSelected={selectedSneakers.includes(sneaker.id)}
+          isSelected={selectedSneakers.includes(sneaker._id)}
           onToggleSelect={onToggleSelect}
         />
       ))}
