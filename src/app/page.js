@@ -9,14 +9,25 @@ import Modal from '../components/Modal';
 export default function Home() {
   const { data: session, status } = useSession();
   const [sneakers, setSneakers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSneaker, setEditingSneaker] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSneakers, setSelectedSneakers] = useState([]);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Update loading state based on session status
+  useEffect(() => {
+    if (status === 'loading') {
+      setLoading(true);
+    } else if (status === 'authenticated') {
+      // Keep loading true if we need to fetch sneakers
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [status]);
 
   // Redirect to sign-in if not authenticated
   useEffect(() => {
@@ -32,7 +43,6 @@ export default function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
     
     try {
-      setLoading(true);
       setError(null);
       
       const res = await fetch('/api/sneakers', {
@@ -61,7 +71,6 @@ export default function Home() {
       setSneakers([]);
     } finally {
       setLoading(false);
-      setIsInitialLoad(false);
     }
     
     return () => {
@@ -72,11 +81,11 @@ export default function Home() {
 
   // Load sneakers when authenticated
   useEffect(() => {
-    if (status === 'authenticated' && isInitialLoad) {
+    if (status === 'authenticated') {
       const cleanup = fetchSneakers();
       return () => cleanup && cleanup();
     }
-  }, [status, isInitialLoad, fetchSneakers]);
+  }, [status, fetchSneakers]);
 
 
   const handleAdd = () => {
