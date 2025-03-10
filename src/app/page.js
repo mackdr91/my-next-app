@@ -17,74 +17,76 @@ export default function Home() {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSneakers, setSelectedSneakers] = useState([]);
 
-  // Update loading state based on session status
-  useEffect(() => {
-    if (status === 'loading') {
-      setLoading(true);
-    } else if (status === 'authenticated') {
-      // Keep loading true if we need to fetch sneakers
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
-  }, [status]);
 
-  // Redirect to sign-in if not authenticated
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      window.location.href = '/auth/signin';
-    }
-  }, [status]);
 
-  const fetchSneakers = useCallback(async () => {
+
+
+  const fetchSneakers = useCallback(async (signal) => {
     if (!session || status !== 'authenticated') return;
     
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    // Create a new controller if no signal is provided
+    const localController = signal ? undefined : new AbortController();
+    const effectiveSignal = signal || localController?.signal;
     
     try {
       setError(null);
       
       const res = await fetch('/api/sneakers', {
-        signal: controller.signal,
+        signal: effectiveSignal,
         headers: {
           'Cache-Control': 'no-store',
           'Pragma': 'no-cache'
         }
       });
       
-      clearTimeout(timeoutId);
-      
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
       
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ error: 'Invalid JSON response' }));
       if (data.error) {
         throw new Error(data.error);
       }
       
-      setSneakers(data.sneakers);
+      setSneakers(data.sneakers || []);
     } catch (error) {
-      console.error('Error fetching sneakers:', error);
-      setError(error.name === 'AbortError' ? 'Request timed out. Please try again.' : error.message);
-      setSneakers([]);
+      if (!effectiveSignal?.aborted) {
+        console.error('Error fetching sneakers:', error);
+        setError(error.name === 'AbortError' ? 'Request timed out. Please try again.' : error.message);
+        setSneakers([]);
+      }
     } finally {
-      setLoading(false);
+      if (!effectiveSignal?.aborted) {
+        setLoading(false);
+      }
+      // Clean up local controller if we created one
+      if (localController) {
+        localController.abort();
+      }
     }
-    
-    return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
   }, [session, status]);
 
   // Load sneakers when authenticated
   useEffect(() => {
-    if (status === 'authenticated') {
-      const cleanup = fetchSneakers();
-      return () => cleanup && cleanup();
+    let controller;
+    let timeoutId;
+
+    async function loadSneakers() {
+      if (status === 'authenticated') {
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        await fetchSneakers(controller.signal);
+      }
     }
+
+    loadSneakers();
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (controller) controller.abort();
+    };
   }, [status, fetchSneakers]);
 
 
@@ -115,21 +117,34 @@ export default function Home() {
         body: JSON.stringify({ ids: selectedSneakers })
       });
 
-      clearTimeout(timeoutId);
-
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to delete sneakers');
       }
 
-      await fetchSneakers();
-      setIsDeleteMode(false);
-      setSelectedSneakers([]);
+      // Create a new controller for fetching sneakers
+      const fetchController = new AbortController();
+      const fetchTimeoutId = setTimeout(() => fetchController.abort(), 5000);
+
+      try {
+        if (!controller?.signal?.aborted) {
+          await fetchSneakers(fetchController.signal);
+          setIsDeleteMode(false);
+          setSelectedSneakers([]);
+        }
+      } finally {
+        clearTimeout(fetchTimeoutId);
+        fetchController.abort();
+      }
     } catch (error) {
-      console.error('Error deleting sneakers:', error);
-      setError(error.name === 'AbortError' ? 'Request timed out. Please try again.' : (error.message || 'Failed to delete sneakers. Please try again.'));
+      if (!controller?.signal?.aborted) {
+        console.error('Error deleting sneakers:', error);
+        setError(error.name === 'AbortError' ? 'Request timed out. Please try again.' : (error.message || 'Failed to delete sneakers. Please try again.'));
+      }
     } finally {
-      setLoading(false);
+      if (!controller?.signal?.aborted) {
+        setLoading(false);
+      }
       clearTimeout(timeoutId);
       controller.abort();
     }
@@ -145,12 +160,63 @@ export default function Home() {
 
 
 
+  if (status === 'loading') {
+    return (
+      <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px] flex items-center justify-center">
+        <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="text-gray-300 mt-4">Loading...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px] flex items-center justify-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+              Sneaker Collection Manager
+            </h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Welcome to your personal sneaker collection manager. Keep track of your favorite kicks, 
+              manage your collection, and never lose sight of your prized possessions.
+            </p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Track Your Collection</h3>
+                  <p className="text-gray-400">Easily manage and organize your entire sneaker collection in one place.</p>
+                </div>
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Secure Storage</h3>
+                  <p className="text-gray-400">Your collection data is safely stored and accessible only to you.</p>
+                </div>
+                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Easy Management</h3>
+                  <p className="text-gray-400">Add, edit, or remove sneakers from your collection with just a few clicks.</p>
+                </div>
+              </div>
+              <a 
+                href="/auth/signin"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl hover:opacity-90 transition-opacity duration-200"
+              >
+                Sign In to Get Started
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
       <div className="mx-auto py-8">
         <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-white">Sneaker Collection</h1>
+            <h1 className="text-4xl font-bold text-white">👟 Sneaker Central</h1>
             {status === 'authenticated' && (
               <button
                 onClick={() => signOut({ callbackUrl: '/auth/signin' })}
