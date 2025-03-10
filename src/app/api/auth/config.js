@@ -62,6 +62,11 @@ export const authOptions = {
       }
     })
   ],
+  trustHost: true,
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
@@ -125,16 +130,12 @@ export const authOptions = {
       return session;
     }
   },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
-  },
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   jwt: {
-    maxAge: 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
