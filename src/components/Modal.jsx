@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
+const Modal = ({ isOpen, onClose, onSubmit, isSubmitting = false, editingSneaker = null }) => {
   const [formErrors, setFormErrors] = React.useState({});
   const [formData, setFormData] = React.useState({
     brand: '',
@@ -18,48 +18,24 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
       return `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
     }
 
-    // Trim strings for length validation
-    if (typeof value === 'string') {
-      value = value.trim();
-    }
-
     switch (name) {
       case 'brand':
       case 'model':
-        if (value.length < 2) {
-          return `${name.charAt(0).toUpperCase() + name.slice(1)} must be at least 2 characters`;
-        }
-        if (value.length > 50) {
-          return `${name.charAt(0).toUpperCase() + name.slice(1)} must be less than 50 characters`;
-        }
-        break;
-
       case 'color':
         if (value.length < 2) {
-          return 'Color must be at least 2 characters';
-        }
-        if (value.length > 30) {
-          return 'Color must be less than 30 characters';
-        }
-        if (!/^[a-zA-Z\s-]+$/.test(value)) {
-          return 'Color must contain only letters, spaces, and hyphens';
+          return 'Required';
         }
         break;
 
       case 'price':
         if (value && isNaN(value)) {
-          return 'Price must be a valid number';
-        }
-        if (value && (value < 0 || value > 100000)) {
-          return 'Price must be between $0 and $100,000';
+          return 'Invalid price';
         }
         break;
+
       case 'size':
         if (value && isNaN(value)) {
-          return 'Size must be a valid number';
-        }
-        if (value && (value < 4 || value > 18)) {
-          return 'Size must be between 4 and 18';
+          return 'Invalid size';
         }
         break;
       default:
@@ -99,19 +75,8 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
     
-    // Clear error when field is modified
     setFormErrors(prev => ({ ...prev, [name]: '' }));
-    
-    // Validate field
-    if (type !== 'checkbox') {
-      const error = validateField(name, newValue);
-      if (error) {
-        setFormErrors(prev => ({ ...prev, [name]: error }));
-      }
-    }
-
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -128,6 +93,13 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
         }
       }
     });
+
+    const price = Number(formData.price);
+    const size = Number(formData.size);
+
+    if (isNaN(price)) errors.price = 'Invalid price';
+    if (isNaN(size)) errors.size = 'Invalid size';
+
     return errors;
   };
 
@@ -135,14 +107,37 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
     e.preventDefault();
     
     const errors = validateForm();
+    const trimmedData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [
+        key,
+        typeof value === 'string' ? value.trim() : value
+      ])
+    );
+
+    // Check for empty required fields
+    const emptyFields = Object.entries(trimmedData)
+      .filter(([key, value]) => key !== 'inStock' && !value)
+      .map(([key]) => key);
+
+    if (emptyFields.length > 0) {
+      setFormErrors(prev => ({
+        ...prev,
+        ...Object.fromEntries(emptyFields.map(field => [
+          field,
+          `${field.charAt(0).toUpperCase() + field.slice(1)} is required`
+        ]))
+      }));
+      return;
+    }
+
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
 
     // Convert price and size to numbers for final validation
-    const numericPrice = Number(formData.price);
-    const numericSize = Number(formData.size);
+    const numericPrice = Number(trimmedData.price);
+    const numericSize = Number(trimmedData.size);
 
     if (isNaN(numericPrice) || isNaN(numericSize)) {
       setFormErrors(prev => ({
@@ -153,55 +148,63 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
       return;
     }
 
+    // Submit the trimmed data
     onSubmit({
-      ...formData,
-      price: Number(formData.price),
-      size: Number(formData.size)
+      ...trimmedData,
+      price: numericPrice,
+      size: numericSize
     });
+
     resetForm();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 w-full max-w-md">
+
+        <h2 className="text-2xl font-bold mb-6 text-white">
           {editingSneaker ? 'Edit Sneaker' : 'Add New Sneaker'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Brand</label>
             <input
               type="text"
               name="brand"
               value={formData.brand}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:bg-white/5 disabled:cursor-not-allowed"
               required
               disabled={isSubmitting}
             />
             {formErrors.brand && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.brand}</p>
+              <p className="mt-1 text-sm text-red-300">{formErrors.brand}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Model</label>
             <input
               type="text"
               name="model"
               value={formData.model}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:bg-white/5 disabled:cursor-not-allowed"
               required
               disabled={isSubmitting}
             />
             {formErrors.model && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.model}</p>
+              <p className="mt-1 text-sm text-red-300 flex items-center">
+                <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                {formErrors.model}
+              </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Price ($)</label>
             <input
               type="number"
               name="price"
@@ -209,31 +212,41 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
               onChange={handleChange}
               min="0"
               step="0.01"
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:bg-white/5 disabled:cursor-not-allowed"
               required
               disabled={isSubmitting}
             />
             {formErrors.price && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.price}</p>
+              <p className="mt-1 text-sm text-red-300 flex items-center">
+                <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                {formErrors.price}
+              </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Color</label>
             <input
               type="text"
               name="color"
               value={formData.color}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:bg-white/5 disabled:cursor-not-allowed"
               required
               disabled={isSubmitting}
             />
             {formErrors.color && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.color}</p>
+              <p className="mt-1 text-sm text-red-300 flex items-center">
+                <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                {formErrors.color}
+              </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Size</label>
+            <label className="block text-sm font-medium text-white/80 mb-1">Size</label>
             <input
               type="number"
               name="size"
@@ -242,12 +255,17 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
               min="4"
               max="18"
               step="0.5"
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:bg-white/5 disabled:cursor-not-allowed"
               required
               disabled={isSubmitting}
             />
             {formErrors.size && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.size}</p>
+              <p className="mt-1 text-sm text-red-300 flex items-center">
+                <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                {formErrors.size}
+              </p>
             )}
           </div>
           <div className="flex items-center">
@@ -256,28 +274,28 @@ const Modal = ({ isOpen, onClose, onSubmit, isSubmitting, editingSneaker }) => {
               name="inStock"
               checked={formData.inStock}
               onChange={handleChange}
-              className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 bg-white/5 border-white/20 text-blue-400 focus:ring-blue-500/50 rounded"
               disabled={isSubmitting}
             />
-            <label className="ml-2 block text-sm text-gray-700">In Stock</label>
+            <label className="ml-2 block text-sm text-white/80">In Stock</label>
           </div>
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm bg-white/5 border border-white/20 hover:bg-white/10 rounded-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 text-sm font-medium text-white backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 rounded-md hover:bg-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-all duration-300"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#1a237e]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

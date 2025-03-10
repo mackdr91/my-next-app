@@ -15,11 +15,20 @@ export async function GET() {
                     error: 'Invalid data format', 
                     sneakers: [] 
                 }), 
-                { status: 400 }
+                { 
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' }
+                }
             );
         }
 
-        return Response.json(sneakers);
+        return new Response(
+            JSON.stringify(sneakers),
+            { 
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
     } catch (error) {
         console.error('Error loading sneakers:', error);
         return new Response(
@@ -27,7 +36,10 @@ export async function GET() {
                 error: 'Failed to load data', 
                 sneakers: [] 
             }), 
-            { status: 500 }
+            { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
     }
 }

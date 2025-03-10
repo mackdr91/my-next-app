@@ -11,6 +11,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSneaker, setEditingSneaker] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSneakers, setSelectedSneakers] = useState([]);
 
@@ -83,18 +84,18 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100">
+    <main className="min-h-screen bg-black bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
       <div className="mx-auto py-8">
         <div className="max-w-[2000px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900">Sneaker Collection</h1>
+            <h1 className="text-4xl font-bold text-white">Sneaker Collection</h1>
             <div className="flex gap-4">
               {isDeleteMode ? (
                 <>
                   <button
                     onClick={handleDelete}
                     disabled={selectedSneakers.length === 0}
-                    className={`px-4 py-2 rounded-md text-white font-medium ${selectedSneakers.length === 0 ? 'bg-red-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
+                    className={`px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm border transition-all duration-300 ${selectedSneakers.length === 0 ? 'bg-red-500/30 border-red-500/20 cursor-not-allowed' : 'bg-red-500/20 border-red-500/30 hover:bg-red-500/30'}`}
                   >
                     Delete Selected ({selectedSneakers.length})
                   </button>
@@ -103,7 +104,7 @@ export default function Home() {
                       setIsDeleteMode(false);
                       setSelectedSneakers([]);
                     }}
-                    className="px-4 py-2 rounded-md text-gray-700 font-medium hover:bg-gray-100"
+                    className="px-4 py-2 rounded-md text-white/80 font-medium backdrop-blur-sm bg-white/5 border border-white/20 hover:bg-white/10 transition-all duration-300"
                   >
                     Cancel
                   </button>
@@ -112,13 +113,13 @@ export default function Home() {
                 <>
                   <button
                     onClick={() => setIsDeleteMode(true)}
-                    className="px-4 py-2 rounded-md text-white font-medium bg-red-500 hover:bg-red-600"
+                    className="px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
                   >
                     Delete Mode
                   </button>
                   <button
                     onClick={handleAdd}
-                    className="px-4 py-2 rounded-md text-white font-medium bg-blue-500 hover:bg-blue-600"
+                    className="px-4 py-2 rounded-md text-white font-medium backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
                   >
                     Add Sneaker
                   </button>
@@ -137,13 +138,14 @@ export default function Home() {
           />
         </div>
       </div>
-      {isModalOpen && (
-        <Modal
+      <Modal
+          isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setEditingSneaker(null);
           }}
-          onSave={async (sneakerData) => {
+          onSubmit={async (sneakerData) => {
+            setIsSubmitting(true);
             try {
               const method = editingSneaker ? 'PUT' : 'POST';
               const url = editingSneaker
@@ -156,19 +158,24 @@ export default function Home() {
                 body: JSON.stringify(sneakerData),
               });
 
-              if (!res.ok) throw new Error('Failed to save sneaker');
+              if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to save sneaker');
+              }
 
               fetchSneakers();
               setIsModalOpen(false);
               setEditingSneaker(null);
             } catch (error) {
               console.error('Error saving sneaker:', error);
-              setError('Failed to save sneaker. Please try again.');
+              setError(error.message || 'Failed to save sneaker. Please try again.');
+            } finally {
+              setIsSubmitting(false);
             }
           }}
           editingSneaker={editingSneaker}
+          isSubmitting={isSubmitting}
         />
-      )}
     </main>
   );
 }

@@ -4,16 +4,16 @@ import React from 'react';
 import Card from './Card';
 
 const LoadingSkeleton = () => (
-  <div className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
-    <div className="h-48 bg-gray-200"></div>
+  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden animate-pulse">
+    <div className="h-48 bg-white/5"></div>
     <div className="p-5 space-y-4">
       <div className="flex justify-between">
-        <div className="h-6 w-24 bg-gray-200 rounded"></div>
-        <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+        <div className="h-6 w-24 bg-white/5 rounded"></div>
+        <div className="h-6 w-20 bg-white/5 rounded-full"></div>
       </div>
       <div className="flex justify-between">
-        <div className="h-5 w-16 bg-gray-200 rounded"></div>
-        <div className="h-5 w-16 bg-gray-200 rounded"></div>
+        <div className="h-5 w-16 bg-white/5 rounded"></div>
+        <div className="h-5 w-16 bg-white/5 rounded"></div>
       </div>
     </div>
   </div>
@@ -32,8 +32,8 @@ const Grid = ({ sneakers, error, loading, onEdit, isDeleteMode, selectedSneakers
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
-        <p className="text-xl text-red-500">Error loading sneakers</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-white/80">
+        <p className="text-xl text-red-300">Error loading sneakers</p>
         <p className="mt-2">Please try again later</p>
       </div>
     );
@@ -41,7 +41,7 @@ const Grid = ({ sneakers, error, loading, onEdit, isDeleteMode, selectedSneakers
 
   if (!sneakers || sneakers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-white/80">
         <p className="text-xl">No sneakers found</p>
         <p className="mt-2">Check back later for new arrivals</p>
       </div>
