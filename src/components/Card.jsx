@@ -5,7 +5,7 @@ import React from 'react';
 const Card = ({ sneaker }) => {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-      <div className="relative h-48 w-full bg-gradient-to-br from-gray-50 to-gray-200">
+      <div className="relative h-48 w-full bg-gradient-to-br from-blue-100 via-blue-50 to-gray-100">
         <div className="h-full w-full flex flex-col items-center justify-center p-4 text-center">
           <span className="text-2xl font-bold text-gray-700">{sneaker.brand}</span>
           <span className="text-xl text-gray-600 mt-2">{sneaker.model}</span>
